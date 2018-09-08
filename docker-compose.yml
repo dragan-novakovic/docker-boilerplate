@@ -1,0 +1,16 @@
+version: "3.5"
+
+services:
+  sample-app:
+    container_name: react-dev-demo
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ".:/app"
+      - "/app/node_modules"
+    ports:
+      - "3000:3000"
+      - "35729:35729"
+    environment:
+      - NODE_ENV=development
