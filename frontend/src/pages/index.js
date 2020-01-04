@@ -6,7 +6,7 @@ function HomePage({ stars }) {
 
 HomePage.getInitialProps = async ({ req }) => {
   try {
-    const res = await fetch('http://node-prod:5000/api');
+    const res = await fetch('http://node-prod:5000/api/secret');
     const json = await res.json();
     return { stars: json.secret };
   } catch (error) {

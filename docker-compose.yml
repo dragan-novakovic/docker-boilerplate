@@ -7,6 +7,9 @@ services:
       target: prod
     ports:
       - '5000:5000'
+    env_file: .env.example
+    depends_on:
+      - postgres
 
   # front-end built with react
   react-prod:
@@ -32,3 +35,13 @@ services:
     depends_on:
       - node-prod
       - react-prod
+
+  # postgres is our primary data store
+  postgres:
+    build: postgres
+    ports:
+      - '35432:5432'
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: db
