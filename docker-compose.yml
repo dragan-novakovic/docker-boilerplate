@@ -1,16 +1,34 @@
-version: "3.5"
-
+version: '3.4'
 services:
-  sample-app:
-    container_name: react-dev-demo
+  node-prod:
+    restart: always
     build:
-      context: .
-      dockerfile: Dockerfile
-    volumes:
-      - ".:/app"
-      - "/app/node_modules"
+      context: backend
+      target: prod
     ports:
-      - "3000:3000"
-      - "35729:35729"
-    environment:
-      - NODE_ENV=development
+      - '5000:5000'
+
+  # front-end built with react
+  react-prod:
+    restart: always
+    build:
+      context: frontend
+      target: prod
+    ports:
+      - '3000:3000'
+
+  # nginx is used for ssl termination
+  nginx-prod:
+    restart: always
+    build:
+      context: nginx
+      target: dev
+    # volumes:
+    #  - ../certs-data:/data/letsencrypt
+    #  - /etc/letsencrypt/:/etc/letsencrypt/
+    ports:
+      - '80:80'
+      - '443:443'
+    depends_on:
+      - node-prod
+      - react-prod
