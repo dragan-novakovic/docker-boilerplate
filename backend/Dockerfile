@@ -1,17 +1,15 @@
-FROM node:10.13-alpine as prod
+FROM node:10.13 as prod
 
-RUN mkdir -p /home/node/app/node_modules && chown -R node:node /home/node/app
-
-WORKDIR /home/node/app
+WORKDIR /usr/src/app
 
 COPY package*.json ./
+COPY index.js ./
 
-USER node
+USER root
 
 RUN npm install
 
-COPY --chown=node:node . .
-
-EXPOSE 5000
-
-CMD [ "node", "index.js" ]
+# Add wait-for-it
+COPY wait-for-it.sh wait-for-it.sh 
+RUN chmod +x wait-for-it.sh
+CMD ["./wait-for-it.sh" , "--host=postgres", "--port=5432", "--" , "node", "index.js"]
