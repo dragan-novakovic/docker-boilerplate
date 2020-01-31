@@ -1,14 +1,12 @@
-FROM node:latest
+FROM node:10.13
 
-# set working directory
-RUN mkdir /usr/src/app
-WORKDIR /usr/src
+WORKDIR /usr/src/app
 
-# add `/usr/src/node_modules/.bin` to $PATH
-ENV PATH /usr/src/node_modules/.bin:$PATH
+COPY package*.json ./
+COPY index.js ./
 
-# install and cache app dependencies
-ADD package.json /usr/src/package.json
+USER root
+
 RUN npm install
 
 ADD wait-for-it.sh wait-for-it.sh

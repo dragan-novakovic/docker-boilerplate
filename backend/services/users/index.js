@@ -3,12 +3,7 @@ const express = require("express");
 const { Client } = require("pg");
 const PORT = 3000;
 
-const client = new Client({
-  password: "postgres",
-  user: "postgres",
-  host: "postgres",
-  port: 5431
-});
+const client = new Client(process.env.DATABASE_URL);
 const app = express();
 
 app.get("/api/users", async (req, res) => {
@@ -17,7 +12,7 @@ app.get("/api/users", async (req, res) => {
       .query("SELECT * FROM users")
       .catch(err => console.log("Catch Err:", err));
     ///@ts-ignore
-    console.log(result, result.rows[0]);
+    console.log(result.rows[0]);
     ///@ts-ignore
     res.json({ posts: result.rows[0] });
   } catch (error) {

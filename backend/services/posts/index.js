@@ -12,7 +12,7 @@ app.get("/api/posts", async (req, res) => {
       .query("SELECT * FROM posts")
       .catch(err => console.log("Catch Err:", err));
     ///@ts-ignore
-    console.log(result, result.rows[0]);
+    console.log(result.rows[0]);
     ///@ts-ignore
     res.json({ posts: result.rows[0] });
   } catch (error) {

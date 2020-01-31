@@ -1,47 +1,41 @@
 version: "3.4"
 services:
   # api-gateway:
-  # user:
-  #   container_name: users-service
-  #   build: backend/services/users/
-  #   # volumes:
-  #   #   - "backend/services/users:/usr/src/app"
-  #   #   - "backend/services/users/package.json:/usr/src/package.json"
-  #   ports:
-  #     - "3001:3000" # expose ports - HOST:CONTAINER
-  #   environment:
-  #     - DATABASE_URL=postgres://postgres:postgres@users-db:5431/users_dev
-  #     - DATABASE_TEST_URL=postgres://postgres:postgres@users-db:5431/users_test
-  #     - NODE_ENV=development
-  #     - TOKEN_SECRET=changeme
-  #   depends_on:
-  #     - users-db
-  #   links:
-  #     - users-db
-  # users-db:
-  #   container_name: users-db
-  #   build: backend/services/users/db
-  #   ports:
-  #     - "5431:5432" # expose ports - HOST:CONTAINER
-  #   environment:
-  #     - POSTGRES_USER=postgres
-  #     - POSTGRES_PASSWORD=postgres
-  #   healthcheck:
-  #     test: exit 0
+  users:
+    build:
+      context: backend/services/users
+    ports:
+      - "3001:3000"
+    environment:
+      - DATABASE_URL=postgres://postgres:postgres@users-db:5432/users
+    depends_on:
+      - users-db
 
+  users-db:
+    build:
+      context: backend/services/posts/db
+    expose:
+      - "5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=users
+    healthcheck:
+      test: exit 0
+  # POSTS
   posts:
-    build: backend/services/posts
+    build:
+      context: backend/services/posts
     ports:
       - "3002:3000"
     environment:
       - DATABASE_URL=postgres://postgres:postgres@posts-db:5432/posts
     depends_on:
       - posts-db
-    links:
-      - posts-db
 
   posts-db:
-    build: backend/services/posts/db
+    build:
+      context: backend/services/posts/db
     expose:
       - "5432"
     environment:
@@ -60,7 +54,6 @@ services:
       - "5000:5000"
     depends_on:
       - postgres
-
   # front-end built with react
   react-prod:
     restart: always
@@ -71,7 +64,6 @@ services:
       - "3333:3000"
     depends_on:
       - node-prod
-
   # nginx is used for ssl termination
   nginx-prod:
     restart: always
@@ -84,7 +76,6 @@ services:
     depends_on:
       - node-prod
       - react-prod
-
   # postgres is our primary data store
   postgres:
     restart: always
