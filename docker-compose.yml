@@ -1,4 +1,4 @@
-version: "3.4"
+version: "3.5"
 services:
   # api-gateway:
   users:
@@ -10,6 +10,9 @@ services:
       - DATABASE_URL=postgres://postgres:postgres@users-db:5432/users
     depends_on:
       - users-db
+    networks:
+      - users-net
+      - api-gateway
 
   users-db:
     build:
@@ -22,6 +25,8 @@ services:
       - POSTGRES_DB=users
     healthcheck:
       test: exit 0
+    networks:
+      - users-net
   # POSTS
   posts:
     build:
@@ -32,6 +37,9 @@ services:
       - DATABASE_URL=postgres://postgres:postgres@posts-db:5432/posts
     depends_on:
       - posts-db
+    networks:
+      - users-net
+      - api-gateway
 
   posts-db:
     build:
@@ -44,6 +52,8 @@ services:
       - POSTGRES_DB=posts
     healthcheck:
       test: exit 0
+    networks:
+      - posts-net
   # node backend
   node-prod:
     restart: always
@@ -54,6 +64,8 @@ services:
       - "5000:5000"
     depends_on:
       - postgres
+    networks:
+      - api-gateway
   # front-end built with react
   react-prod:
     restart: always
@@ -64,6 +76,8 @@ services:
       - "3333:3000"
     depends_on:
       - node-prod
+    networks:
+      - api-gateway
   # nginx is used for ssl termination
   nginx-prod:
     restart: always
@@ -76,6 +90,8 @@ services:
     depends_on:
       - node-prod
       - react-prod
+    networks:
+      - api-gateway
   # postgres is our primary data store
   postgres:
     restart: always
@@ -87,3 +103,13 @@ services:
       POSTGRES_PASSWORD: docker
       POSTGRES_USER: docker
       POSTGRES_DB: docker
+    networks:
+      - api-gateway
+
+# NETWORKS
+
+networks:
+  api-gateway:
+  users-net:
+  posts-net:
+# NLP BS CALC !
