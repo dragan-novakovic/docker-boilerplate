@@ -3,9 +3,9 @@ syntax = "proto3";
 package user;
 
 service UserService {
-    rpc List (Empty) returns (UserList) {}
-    rpc Insert (User) returns (User) {}
-    rpc Delete (UserRequestId) returns (User) {}
+    rpc list (Empty) returns (UserList) {}
+    rpc insert (User) returns (User) {}
+    rpc delete (UserRequestId) returns (User) {}
 }
 
 message Empty {}

@@ -1,98 +1,99 @@
 version: "3.5"
 services:
-  # api-gateway:
-  users:
-    build:
-      context: backend/services/users
-    ports:
-      - "3001:3000"
-    environment:
-      - DATABASE_URL=postgres://postgres:postgres@users-db:5432/users
-    depends_on:
-      - users-db
-    networks:
-      - users-net
-      - api-gateway
-
-  users-db:
-    build:
-      context: backend/services/posts/db
-    expose:
-      - "5432"
-    environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=users
-    healthcheck:
-      test: exit 0
-    networks:
-      - users-net
-  # POSTS
-  posts:
-    build:
-      context: backend/services/posts
-    ports:
-      - "3002:3000"
-    environment:
-      - DATABASE_URL=postgres://postgres:postgres@posts-db:5432/posts
-    depends_on:
-      - posts-db
-    networks:
-      - users-net
-      - api-gateway
-
-  posts-db:
-    build:
-      context: backend/services/posts/db
-    expose:
-      - "5432"
-    environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=posts
-    healthcheck:
-      test: exit 0
-    networks:
-      - posts-net
-  # node backend
   node-prod:
-    restart: always
     build:
-      context: backend
-      target: prod
+      context: backend/services/gateway
     ports:
       - "5000:5000"
+    environment:
+      - PRODUCTION=true
     depends_on:
       - postgres
     networks:
       - api-gateway
+
+  # users:
+  #   build:
+  #     context: backend/services/users
+  #   ports:
+  #     - "3001:3000"
+  #   environment:
+  #     - DATABASE_URL=postgres://postgres:postgres@users-db:5432/users
+  #   depends_on:
+  #     - users-db
+  #   networks:
+  #     - users-net
+  #     - api-gateway
+
+  # users-db:
+  #   build:
+  #     context: backend/services/posts/db
+  #   expose:
+  #     - "5432"
+  #   environment:
+  #     - POSTGRES_USER=postgres
+  #     - POSTGRES_PASSWORD=postgres
+  #     - POSTGRES_DB=users
+  #   healthcheck:
+  #     test: exit 0
+  #   networks:
+  #     - users-net
+  # POSTS
+  # posts:
+  #   build:
+  #     context: backend/services/posts
+  #   ports:
+  #     - "3002:3000"
+  #   environment:
+  #     - DATABASE_URL=postgres://postgres:postgres@posts-db:5432/posts
+  #   depends_on:
+  #     - posts-db
+  #   networks:
+  #     - users-net
+  #     - api-gateway
+
+  # posts-db:
+  # build:
+  #   context: backend/services/posts/db
+  # expose:
+  #   - "5432"
+  # environment:
+  #   - POSTGRES_USER=postgres
+  #   - POSTGRES_PASSWORD=postgres
+  #   - POSTGRES_DB=posts
+  # healthcheck:
+  #   test: exit 0
+  # networks:
+  #   - posts-net
+
   # front-end built with react
-  react-prod:
-    restart: always
-    build:
-      context: frontend
-      target: prod
-    ports:
-      - "3333:3000"
-    depends_on:
-      - node-prod
-    networks:
-      - api-gateway
+  # react-prod:
+  #   restart: always
+  #   build:
+  #     context: frontend
+  #     target: prod
+  #   ports:
+  #     - "3333:3000"
+  #   depends_on:
+  #     - node-prod
+  #   networks:
+  #     - api-gateway
   # nginx is used for ssl termination
-  nginx-prod:
-    restart: always
-    build:
-      context: nginx
-      target: dev
-    ports:
-      - "80:80"
-      - "443:443"
-    depends_on:
-      - node-prod
-      - react-prod
-    networks:
-      - api-gateway
+  # nginx-prod:
+  #   restart: always
+  #   build:
+  #     context: nginx
+  #     target: dev
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #   depends_on:
+  #     - node-prod
+  #     - react-prod
+  #   networks:
+  #     - api-gateway
   # postgres is our primary data store
+
   postgres:
     restart: always
     build: postgres

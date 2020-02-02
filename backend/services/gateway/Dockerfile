@@ -1,11 +1,11 @@
-FROM node:10.13 as prod
+FROM node:10.13
 
 WORKDIR /usr/src/app
 
-COPY package*.json ./
-COPY index.js ./
 
-USER root
+COPY package*.json ./
+COPY src ./
+
 
 RUN npm install
 
