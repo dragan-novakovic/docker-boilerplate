@@ -32,22 +32,16 @@ app.get("/api/secret", (req, res) =>
 app.get("/api/test", async (req, res) => {
   try {
     //@ts-ignore
-    grpc_client.list({}, (error, users) => {
+    grpc_client.list({}, async (error, users) => {
       if (!error) {
-        console.log("successfully fetch List notes");
-        console.log(users);
+        console.log("successfully fetch List notes", users);
+
+        res.json({ time: users });
       } else {
+        console.log("ITS AN GRPC ERR");
         console.error(error);
       }
     });
-
-    const result = await client
-      .query("SELECT * FROM test")
-      .catch(err => console.log("Catch Err:", err));
-    ///@ts-ignore
-    console.log(result.rows[0]);
-    ///@ts-ignore
-    res.json({ time: result.rows[0] });
   } catch (error) {
     console.log("ERR:", error);
     return { time: null };

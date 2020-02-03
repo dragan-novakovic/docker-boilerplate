@@ -12,32 +12,31 @@ services:
     networks:
       - api-gateway
 
-  # users:
-  #   build:
-  #     context: backend/services/users
-  #   ports:
-  #     - "3001:3000"
-  #   environment:
-  #     - DATABASE_URL=postgres://postgres:postgres@users-db:5432/users
-  #   depends_on:
-  #     - users-db
-  #   networks:
-  #     - users-net
-  #     - api-gateway
+  users:
+    build:
+      context: backend/services/users
+    expose:
+      - "3000"
+    environment:
+      - DATABASE_URL=postgres://postgres:postgres@users-db:5432/users
+      - PRODUCTION=true
+    depends_on:
+      - users-db
+    networks:
+      - users-net
+      - api-gateway
 
-  # users-db:
-  #   build:
-  #     context: backend/services/posts/db
-  #   expose:
-  #     - "5432"
-  #   environment:
-  #     - POSTGRES_USER=postgres
-  #     - POSTGRES_PASSWORD=postgres
-  #     - POSTGRES_DB=users
-  #   healthcheck:
-  #     test: exit 0
-  #   networks:
-  #     - users-net
+  users-db:
+    build:
+      context: backend/services/posts/db
+    expose:
+      - "5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=users
+    networks:
+      - users-net
   # POSTS
   # posts:
   #   build:
