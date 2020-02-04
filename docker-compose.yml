@@ -7,8 +7,17 @@ services:
       - "5000:5000"
     environment:
       - PRODUCTION=true
+      - REDIS_URL=redis://cache
     depends_on:
       - postgres
+    networks:
+      - api-gateway
+
+  redis:
+    image: redis
+    container_name: cache
+    expose:
+      - "6379"
     networks:
       - api-gateway
 
@@ -112,4 +121,4 @@ networks:
   api-gateway:
   users-net:
   posts-net:
-# NLP BS CALC !
+# NLP BS CALCULATOR !
