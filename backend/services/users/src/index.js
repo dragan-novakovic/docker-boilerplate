@@ -13,7 +13,10 @@ const userProtoPath =
     ? path.join(__dirname, "protos", "users.proto")
     : path.join(__dirname, "..", "src", "protos", "users.proto");
 
-const userProtoDefinition = protoLoader.loadSync(userProtoPath);
+const userProtoDefinition = protoLoader.loadSync(userProtoPath, {
+  keepCase: true,
+  defaults: true
+});
 const userPackageDefinition = grpc.loadPackageDefinition(userProtoDefinition)
   .user;
 

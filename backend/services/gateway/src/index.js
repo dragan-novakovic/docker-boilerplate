@@ -27,7 +27,10 @@ const PROTO_PATH_POSTS =
     : path.join(__dirname, "..", "src", "protos", "posts.proto");
 const PORT = 5000;
 
-const packageDefinition = protoLoader.loadSync(PROTO_PATH_USERS);
+const packageDefinition = protoLoader.loadSync(PROTO_PATH_USERS, {
+  keepCase: true,
+  defaults: true
+});
 const userPkg = grpc.loadPackageDefinition(packageDefinition).user;
 
 ///@ts-ignore
@@ -36,7 +39,10 @@ const grpc_client = new userPkg.UserService(
   grpc.credentials.createInsecure()
 );
 
-const post_packageDefinition = protoLoader.loadSync(PROTO_PATH_POSTS);
+const post_packageDefinition = protoLoader.loadSync(PROTO_PATH_POSTS, {
+  keepCase: true,
+  defaults: true
+});
 const postPkg = grpc.loadPackageDefinition(post_packageDefinition).post;
 
 //@ts-ignore
@@ -146,11 +152,11 @@ app.post("/api/posts", async (req, res) => {
 
 app.post("/api/user-posts", async (req, res) => {
   const { user_id, title, description } = req.body;
-  // wierd bug with user_id?
+
   try {
     //@ts-ignore
     grpc_posts_client.createPost(
-      { id: user_id, user_id, title, description },
+      { id: uuidv4(), user_id, title, description },
       async (error, post) => {
         if (!error) {
           console.log("successfully created Post", post);

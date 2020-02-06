@@ -14,13 +14,16 @@ const postProtoPath =
     ? path.join(__dirname, "protos", "posts.proto")
     : path.join(__dirname, "..", "src", "protos", "posts.proto");
 
-const postProtoDefinition = protoLoader.loadSync(postProtoPath);
+const postProtoDefinition = protoLoader.loadSync(postProtoPath, {
+  keepCase: true,
+  defaults: true
+});
 const postPackageDefinition = grpc.loadPackageDefinition(postProtoDefinition)
   .post;
 
 async function getPostList(call, callback) {
   const { id } = call.request;
-  console.log("CALL:", { id });
+
   try {
     const res = await client.query("SELECT * FROM posts WHERE user_id = $1", [
       id
@@ -46,7 +49,7 @@ async function createPost(call, callback) {
   try {
     const res = await client.query(
       "INSERT INTO posts(id, user_id, title, description) VALUES($1, $2, $3, $4) RETURNING *",
-      [uuidv4(), id, title, description]
+      [id, user_id, title, description]
     );
     callback(null, { id: res.rows[0].id });
   } catch (error) {
