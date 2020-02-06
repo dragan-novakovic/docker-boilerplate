@@ -21,31 +21,31 @@ services:
     networks:
       - api-gateway
 
-  # users:
-  #   build:
-  #     context: backend/services/users
-  #   expose:
-  #     - "3000"
-  #   environment:
-  #     - DATABASE_URL=postgres://postgres:postgres@users-db:5432/users
-  #     - PRODUCTION=true
-  #   depends_on:
-  #     - users-db
-  #   networks:
-  #     - users-net
-  #     - api-gateway
+  users:
+    build:
+      context: backend/services/users
+    expose:
+      - "3000"
+    environment:
+      - DATABASE_URL=postgres://postgres:postgres@users-db:5432/users
+      - PRODUCTION=true
+    depends_on:
+      - users-db
+    networks:
+      - users-net
+      - api-gateway
 
-  # users-db:
-  #   build:
-  #     context: backend/services/users/db
-  #   expose:
-  #     - "5432"
-  #   environment:
-  #     - POSTGRES_USER=postgres
-  #     - POSTGRES_PASSWORD=postgres
-  #     - POSTGRES_DB=users
-  #   networks:
-  #     - users-net
+  users-db:
+    build:
+      context: backend/services/users/db
+    expose:
+      - "5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=users
+    networks:
+      - users-net
 
   # POSTS
   posts:
@@ -75,32 +75,32 @@ services:
       - posts-net
 
   # front-end built with react
-  # react-prod:
-  #   restart: always
-  #   build:
-  #     context: frontend
-  #     target: prod
-  #   ports:
-  #     - "3333:3000"
-  #   depends_on:
-  #     - node-prod
-  #   networks:
-  #     - api-gateway
+  react-prod:
+    restart: always
+    build:
+      context: frontend
+      target: prod
+    ports:
+      - "3333:3000"
+    depends_on:
+      - node-prod
+    networks:
+      - api-gateway
 
   # nginx is used for ssl termination
-  # nginx-prod:
-  #   restart: always
-  #   build:
-  #     context: nginx
-  #     target: dev
-  #   ports:
-  #     - "80:80"
-  #     - "443:443"
-  #   depends_on:
-  #     - node-prod
-  #     - react-prod
-  #   networks:
-  #     - api-gateway
+  nginx-prod:
+    restart: always
+    build:
+      context: nginx
+      target: dev
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - node-prod
+      - react-prod
+    networks:
+      - api-gateway
 
   postgres:
     restart: always
