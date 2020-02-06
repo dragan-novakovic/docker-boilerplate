@@ -3,7 +3,6 @@ const { Client } = require("pg");
 const path = require("path");
 const protoLoader = require("@grpc/proto-loader");
 const grpc = require("grpc");
-const uuidv4 = require("uuid/v4");
 
 const PORT = 3002;
 const client = new Client(process.env.DATABASE_URL);
