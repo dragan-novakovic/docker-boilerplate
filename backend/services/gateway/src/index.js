@@ -16,13 +16,18 @@ app.use(bodyParser.urlencoded({ extended: false }));
 // parse application/json
 app.use(bodyParser.json());
 
-const PROTO_PATH =
+const PROTO_PATH_USERS =
   process.env.PRODUCTION === "true"
     ? path.join(__dirname, "protos", "users.proto")
     : path.join(__dirname, "..", "src", "protos", "users.proto");
+
+const PROTO_PATH_POSTS =
+  process.env.PRODUCTION === "true"
+    ? path.join(__dirname, "protos", "posts.proto")
+    : path.join(__dirname, "..", "src", "protos", "posts.proto");
 const PORT = 5000;
 
-const packageDefinition = protoLoader.loadSync(PROTO_PATH);
+const packageDefinition = protoLoader.loadSync(PROTO_PATH_USERS);
 const userPkg = grpc.loadPackageDefinition(packageDefinition).user;
 
 ///@ts-ignore
@@ -30,27 +35,34 @@ const grpc_client = new userPkg.UserService(
   "users:3000",
   grpc.credentials.createInsecure()
 );
-const client = new Client("postgres://docker:docker@postgres:5432/docker");
 
-// auth with redis
-// cache with redis
+const post_packageDefinition = protoLoader.loadSync(PROTO_PATH_POSTS);
+const postPkg = grpc.loadPackageDefinition(post_packageDefinition).post;
+
+//@ts-ignore
+const grpc_posts_client = new postPkg.PostService(
+  "posts:3002",
+  grpc.credentials.createInsecure()
+);
+const client = new Client("postgres://docker:docker@postgres:5432/docker");
 
 app.post("/api/register", async (req, res) => {
   try {
     const { username, password } = req.body;
-
+    const id = uuidv4();
     const result = await redisClient.hmsetAsync(
       username,
       "id",
-      uuidv4(),
+      id,
       "password",
       password
     );
 
-    const testData = await redisClient.hgetallAsync(username);
-    console.log(testData);
-
-    res.json({ result });
+    if (result === "OK") {
+      res.json({ result, id });
+    } else {
+      res.json({ result: JSON.stringify(result) });
+    }
   } catch (error) {
     console.log("SOME ERR WITH REGISTER", error);
   }
@@ -60,24 +72,48 @@ app.post("/api/login", async (req, res) => {
   try {
     const { username, password } = req.body;
 
-    const res = await redisClient.hgetall(username);
-    console.log(res);
+    const user_data = await redisClient.hgetallAsync(username);
+
+    if (password === user_data.password) {
+      res.json({ result: "ALL GUD BOI", id: user_data.id });
+    } else {
+      res.json({ result: "BAD BOI" });
+    }
   } catch (error) {
-    console.log("SOME ERR WITH REGISTER");
+    console.log("SOME ERR WITH LOGIN", error);
   }
 });
 
-app.get("/api/user-info", async (req, res) => {
+app.post("/api/user-info", async (req, res) => {
+  const { id, name } = req.body;
   try {
     //@ts-ignore
-    grpc_client.list({}, async (error, users) => {
+    grpc_client.insertDetails({ id, name }, async (error, userDetails) => {
       if (!error) {
-        console.log("successfully fetch users list data", users);
+        console.log("successfully saved user with Details", userDetails);
 
-        res.json({ time: users });
+        res.json({ userDetails });
       } else {
-        console.log("ITS AN GRPC ERR");
-        console.error(error);
+        console.log("ITS AN GRPC ERR", error);
+      }
+    });
+  } catch (error) {
+    console.log("ERR:", error);
+    res.json({ time: null });
+  }
+});
+
+app.post("/api/info", async (req, res) => {
+  const { id } = req.body;
+  try {
+    //@ts-ignore
+    grpc_client.getDetails({ id }, async (error, userDetails) => {
+      if (!error) {
+        console.log("successfully fetch userDetails", userDetails);
+
+        res.json({ userDetails });
+      } else {
+        console.log("ITS AN GRPC ERR", error);
       }
     });
   } catch (error) {
@@ -88,17 +124,18 @@ app.get("/api/user-info", async (req, res) => {
 
 /// POSTS
 
-app.get("/api/user-posts", async (req, res) => {
+app.post("/api/posts", async (req, res) => {
+  const { user_id } = req.body;
+  // get all user posts
   try {
     //@ts-ignore
-    grpc_client.list({}, async (error, users) => {
+    grpc_posts_client.getPostList({ id: user_id }, async (error, posts) => {
       if (!error) {
-        console.log("successfully fetch users list data", users);
+        console.log("successfully fetch users posts", posts);
 
-        res.json({ time: users });
+        res.json(posts);
       } else {
-        console.log("ITS AN GRPC ERR");
-        console.error(error);
+        console.log("ITS AN GRPC ERR", error);
       }
     });
   } catch (error) {
@@ -108,18 +145,22 @@ app.get("/api/user-posts", async (req, res) => {
 });
 
 app.post("/api/user-posts", async (req, res) => {
+  const { user_id, title, description } = req.body;
+  // wierd bug with user_id?
   try {
     //@ts-ignore
-    grpc_client.list({}, async (error, users) => {
-      if (!error) {
-        console.log("successfully fetch users list data", users);
+    grpc_posts_client.createPost(
+      { id: user_id, user_id, title, description },
+      async (error, post) => {
+        if (!error) {
+          console.log("successfully created Post", post);
 
-        res.json({ time: users });
-      } else {
-        console.log("ITS AN GRPC ERR");
-        console.error(error);
+          res.json({ post });
+        } else {
+          console.log("ITS AN GRPC ERR", error);
+        }
       }
-    });
+    );
   } catch (error) {
     console.log("ERR:", error);
     res.json({ time: null });

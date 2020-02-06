@@ -21,21 +21,48 @@ services:
     networks:
       - api-gateway
 
-  users:
+  # users:
+  #   build:
+  #     context: backend/services/users
+  #   expose:
+  #     - "3000"
+  #   environment:
+  #     - DATABASE_URL=postgres://postgres:postgres@users-db:5432/users
+  #     - PRODUCTION=true
+  #   depends_on:
+  #     - users-db
+  #   networks:
+  #     - users-net
+  #     - api-gateway
+
+  # users-db:
+  #   build:
+  #     context: backend/services/users/db
+  #   expose:
+  #     - "5432"
+  #   environment:
+  #     - POSTGRES_USER=postgres
+  #     - POSTGRES_PASSWORD=postgres
+  #     - POSTGRES_DB=users
+  #   networks:
+  #     - users-net
+
+  # POSTS
+  posts:
     build:
-      context: backend/services/users
+      context: backend/services/posts
     expose:
-      - "3000"
+      - "3002"
     environment:
-      - DATABASE_URL=postgres://postgres:postgres@users-db:5432/users
+      - DATABASE_URL=postgres://postgres:postgres@posts-db:5432/posts
       - PRODUCTION=true
     depends_on:
-      - users-db
+      - posts-db
     networks:
-      - users-net
+      - posts-net
       - api-gateway
 
-  users-db:
+  posts-db:
     build:
       context: backend/services/posts/db
     expose:
@@ -43,36 +70,9 @@ services:
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=users
+      - POSTGRES_DB=posts
     networks:
-      - users-net
-  # POSTS
-  # posts:
-  #   build:
-  #     context: backend/services/posts
-  #   ports:
-  #     - "3002:3000"
-  #   environment:
-  #     - DATABASE_URL=postgres://postgres:postgres@posts-db:5432/posts
-  #   depends_on:
-  #     - posts-db
-  #   networks:
-  #     - users-net
-  #     - api-gateway
-
-  # posts-db:
-  # build:
-  #   context: backend/services/posts/db
-  # expose:
-  #   - "5432"
-  # environment:
-  #   - POSTGRES_USER=postgres
-  #   - POSTGRES_PASSWORD=postgres
-  #   - POSTGRES_DB=posts
-  # healthcheck:
-  #   test: exit 0
-  # networks:
-  #   - posts-net
+      - posts-net
 
   # front-end built with react
   # react-prod:
@@ -86,6 +86,7 @@ services:
   #     - node-prod
   #   networks:
   #     - api-gateway
+
   # nginx is used for ssl termination
   # nginx-prod:
   #   restart: always
@@ -100,7 +101,6 @@ services:
   #     - react-prod
   #   networks:
   #     - api-gateway
-  # postgres is our primary data store
 
   postgres:
     restart: always

@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package post;
+
+service PostService {
+    rpc getPostList (UserId) returns (UserPosts) {}
+    rpc getPost (PostId) returns (Post) {}
+    rpc createPost (Post) returns (PostId) {}
+    rpc delete (PostId) returns (Post) {}
+}
+
+message Empty {}
+
+message UserId {
+    string id = 1;
+}
+
+message PostId {
+    string id = 1;
+}
+
+message Post {
+    string id = 1;
+    string user_id = 2;
+    string title = 3;
+    string description = 4;
+}
+
+message UserPosts {
+    repeated Post posts = 1;
+}

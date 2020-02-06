@@ -3,22 +3,18 @@ syntax = "proto3";
 package user;
 
 service UserService {
-    rpc list (Empty) returns (UserList) {}
-    rpc insert (User) returns (User) {}
-    rpc delete (UserRequestId) returns (User) {}
+    rpc getDetails (UserId) returns (Details) {}
+    rpc insertDetails (Details) returns (Details) {}
+    rpc delete (UserId) returns (Details) {}
 }
 
 message Empty {}
 
-message UserRequestId {
+message UserId {
     string id = 1;
 }
 
-message User {
+message Details {
     string id = 1;
-    string username = 2;
-}
-
-message UserList {
-    repeated User users = 1;
+    string name = 2;
 }

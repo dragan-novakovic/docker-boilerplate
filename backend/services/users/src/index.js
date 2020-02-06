@@ -17,26 +17,35 @@ const userProtoDefinition = protoLoader.loadSync(userProtoPath);
 const userPackageDefinition = grpc.loadPackageDefinition(userProtoDefinition)
   .user;
 
-function listUsers(call, callback) {
+async function getDetails(call, callback) {
+  const { id } = call.request;
+
   try {
+    const res = await client.query("SELECT * FROM user WHERE id = $1", [id]);
     callback(null, {
-      users: [
-        { id: "1", username: "Test1" },
-        { id: "2", username: "Test2" }
-      ]
+      id: res.rows[0].id,
+      name: res.rows[0].name
     });
   } catch (error) {
     console.log("ERR:", error);
   }
 }
 
-async function createUser(call, callback) {
-  let payload = call.request;
-  console.log(payload);
-  callback(null, payload);
+async function insertDetails(call, callback) {
+  const { id, name } = call.request;
+
+  try {
+    const res = await client.query(
+      "INSERT INTO user_details(id, name) VALUES($1, $2) RETURNING *",
+      [id, name]
+    );
+    callback(null, { id: res.rows[0].id, name: res.rows[0].name });
+  } catch (error) {
+    console.log("INSERT DETAILS ERROR", error);
+  }
 }
 
-function deleteProduct(call, callback) {
+function deleteDetails(call, callback) {
   let existingNoteIndex = false;
   if (existingNoteIndex) {
     callback(null, {});
@@ -51,12 +60,12 @@ function deleteProduct(call, callback) {
 // main
 function main() {
   const server = new grpc.Server();
-  // gRPC service
+
   //@ts-ignore
   server.addService(userPackageDefinition.UserService.service, {
-    list: listUsers,
-    insert: createUser,
-    delete: deleteProduct
+    getDetails,
+    insertDetails,
+    deleteDetails
   });
 
   // gRPC server
