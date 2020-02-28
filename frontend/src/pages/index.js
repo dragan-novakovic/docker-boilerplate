@@ -1,16 +1,22 @@
 import fetch from "isomorphic-unfetch";
 import { useRouter } from "next/router";
 
-function HomePage({ stars, user }) {
+function HomePage() {
   const router = useRouter();
-  const submitData = e => {
+  const submitData = async e => {
     e.preventDefault();
     const [userField, passField] = e.target.elements;
     const username = userField.value;
     const password = passField.value;
 
     console.log({ username, password });
-    router.push("/user");
+    const user_data = await (
+      await fetch("node-prod:5000/api/login", {
+        method: "POST",
+        body: JSON.stringify({ username, password })
+      })
+    ).json();
+    router.push({ pathname: "/user", query: { id: user_data.id } });
   };
   return (
     <div style={{ display: "flex", justifyContent: "center", marginTop: 50 }}>
@@ -22,7 +28,7 @@ function HomePage({ stars, user }) {
           <div class="mb-4">
             <label
               class="block text-gray-700 text-sm font-bold mb-2"
-              for="username"
+              htmlFor="username"
             >
               Username
             </label>
@@ -36,7 +42,7 @@ function HomePage({ stars, user }) {
           <div class="mb-6">
             <label
               class="block text-gray-700 text-sm font-bold mb-2"
-              for="password"
+              htmlFor="password"
             >
               Password
             </label>
@@ -70,17 +76,5 @@ function HomePage({ stars, user }) {
     </div>
   );
 }
-
-// Home page == LOGIN
-// Your Posts /Create
-
-HomePage.getInitialProps = async ({ req }) => {
-  try {
-    return { stars: 2, user: 2 };
-  } catch (error) {
-    console.log("Res", error);
-    return { stars: "NaN" };
-  }
-};
 
 export default HomePage;
