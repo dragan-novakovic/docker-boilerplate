@@ -9,17 +9,21 @@ export default function CreatePost() {
   const submitForm = async e => {
     e.preventDefault();
     const [titleField, contentField] = e.target.elements;
-    //console.log(userCtx.userId);
-    const response = await (
-      await fetch("node-prod:5000/api/user-posts", {
-        method: "POST",
-        body: JSON.stringify({
-          user_id: userCtx.userId,
-          title: titleField.value,
-          description: contentField.value
+
+    try {
+      const response = await (
+        await fetch("http://node-prod:5000/api/user-posts", {
+          method: "POST",
+          body: JSON.stringify({
+            user_id: userCtx.userId,
+            title: titleField.value,
+            description: contentField.value
+          })
         })
-      })
-    ).json();
+      ).json();
+    } catch (error) {
+      console.log("Err", error);
+    }
 
     // console.log(response);
   };

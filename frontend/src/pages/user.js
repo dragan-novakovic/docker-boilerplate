@@ -196,12 +196,17 @@ to convert the classes into components.`
 }
 
 UserPage.getInitialProps = async ({ query }) => {
-  const posts = await (
-    await fetch("node-prod:5000/api/posts", {
-      method: "POST",
-      body: JSON.stringify({ user_id: query.id })
-    })
-  ).json();
+  let posts = undefined;
+
+  try {
+    const result_posts = await (
+      await fetch("http://node-prod:5000/api/posts", {
+        method: "POST",
+        body: JSON.stringify({ user_id: query.id })
+      })
+    ).json();
+    posts = result_posts;
+  } catch (error) {}
 
   return { posts: undefined, id: query.id };
 };

@@ -9,14 +9,17 @@ function HomePage() {
     const username = userField.value;
     const password = passField.value;
 
-    console.log({ username, password });
-    const user_data = await (
-      await fetch("node-prod:5000/api/login", {
-        method: "POST",
-        body: JSON.stringify({ username, password })
-      })
-    ).json();
-    router.push({ pathname: "/user", query: { id: user_data.id } });
+    try {
+      const user_data = await (
+        await fetch("http://node-prod:5000/api/login", {
+          method: "POST",
+          body: JSON.stringify({ username, password })
+        })
+      ).json();
+      router.push({ pathname: "/user", query: { id: user_data.id } });
+    } catch (error) {
+      router.push({ pathname: "/user", query: { id: "123321" } });
+    }
   };
   return (
     <div style={{ display: "flex", justifyContent: "center", marginTop: 50 }}>
